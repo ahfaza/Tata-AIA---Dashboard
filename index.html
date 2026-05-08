@@ -92,6 +92,7 @@
     .main { padding: 1rem; }
     .profile-grid { grid-template-columns: 1fr; }
     .pfield-full { grid-column: span 1; }
+    .topnav { padding: 0 1rem; }
   }
 </style>
 </head>
@@ -165,9 +166,7 @@
 </div>
 
 <script>
-const SHEET_ID = '1V63NxZ5Rv4H092eLwtlSaJaZRXh4fwggDAbB_pgPAxI';
-const SHEET_NAME = 'Form_Responses';
-const API_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const API_URL = 'https://script.google.com/macros/s/AKfycbylskaOOvfiZlLu4lZ1m_gPCgAYTCAsaZ95McKOilaqamrkqyHvei18CV0WzC0Bao9C5g/exec';
 
 let allClients = [];
 let expandedRow = null;
@@ -238,21 +237,19 @@ async function loadData() {
 
   try {
     const res = await fetch(API_URL);
-    const text = await res.text();
-    const json = JSON.parse(text.replace(/^[^{]*({.*})[^}]*$/, '$1'));
-    const cols = json.table.cols.map(c => c.label);
-    const rows = json.table.rows || [];
+    const json = await res.json();
+    const rows = json.data || [];
 
-    nameKey = cols.find(c => c.toLowerCase().includes('full name')) || cols[1] || '';
+    if (rows.length === 0) {
+      allClients = [];
+      updateMetrics();
+      renderClients();
+      document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+      return;
+    }
 
-    allClients = rows.map(row => {
-      const obj = {};
-      cols.forEach((col, i) => {
-        const cell = row.c && row.c[i];
-        obj[col] = cell ? (cell.f || String(cell.v || '')) : '';
-      });
-      return obj;
-    }).filter(c => c[nameKey] && c[nameKey].trim() !== '');
+    nameKey = Object.keys(rows[0]).find(k => k.toLowerCase().includes('full name')) || Object.keys(rows[0])[1] || '';
+    allClients = rows.filter(c => c[nameKey] && c[nameKey].trim() !== '');
 
     updateMetrics();
     renderClients();
@@ -260,7 +257,7 @@ async function loadData() {
   } catch(err) {
     document.getElementById('error-area').innerHTML = `
       <div class="error-box">
-        <strong>Could not load sheet data.</strong> Make sure the Google Sheet is shared as "Anyone with the link — Viewer".<br>
+        <strong>Could not load data.</strong> The Apps Script API may still be deploying — wait 1 minute and try refreshing.<br>
         <small>${err.message}</small>
       </div>`;
     document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i><p>No data loaded</p></div>';
@@ -326,7 +323,7 @@ function renderClients() {
   document.getElementById('client-count').textContent = `${filtered.length} client${filtered.length !== 1 ? 's' : ''}`;
 
   if (!filtered.length) {
-    document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-users"></i><p>No clients found</p></div>';
+    document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-users"></i><p>No clients yet — share your form link to get started</p></div>';
     return;
   }
 
