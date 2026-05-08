@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tata AIA — Client Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f9f8f6;
+    --bg2: #ffffff;
+    --bg3: #f1f0ec;
+    --text: #1a1a18;
+    --text2: #6b6a64;
+    --text3: #a0a09a;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #085041;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .topnav { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-badge { background: var(--green); color: #fff; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.05em; }
+  .nav-title { font-size: 15px; font-weight: 500; color: var(--text); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .last-updated { font-size: 11px; color: var(--text3); }
+  .refresh-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg3); color: var(--text); cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .refresh-btn:hover { background: var(--bg2); }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .metric { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .metric-value { font-size: 28px; font-weight: 500; color: var(--text); line-height: 1; }
+  .metric-value.sm { font-size: 16px; padding-top: 4px; }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .source-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .source-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .source-name { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .source-count { font-size: 22px; font-weight: 500; color: var(--text); }
+  .source-bar-wrap { margin-top: 8px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .source-bar { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.6s ease; }
+  .controls { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+  .search-wrap { flex: 1; position: relative; }
+  .search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text3); pointer-events: none; }
+  .search-wrap input { width: 100%; padding: 9px 10px 9px 34px; font-size: 13px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-family: inherit; }
+  .search-wrap input:focus { outline: none; border-color: var(--green); }
+  .filter-select { font-size: 13px; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-family: inherit; cursor: pointer; }
+  .client-count-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .client-table { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .client-row { border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s; }
+  .client-row:last-child { border-bottom: none; }
+  .client-row:hover { background: var(--bg3); }
+  .client-row-inner { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--green-dark); flex-shrink: 0; }
+  .client-info { flex: 1; min-width: 0; }
+  .client-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .client-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .client-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+  .cmeta { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+  .cmeta i { font-size: 13px; color: var(--text3); }
+  .pill { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .pill-wa { background: #E1F5EE; color: #085041; }
+  .pill-li { background: #E6F1FB; color: #0C447C; }
+  .pill-em { background: #FAEEDA; color: #633806; }
+  .pill-un { background: #f1f0ec; color: #6b6a64; }
+  .chev { font-size: 16px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+  .chev.open { transform: rotate(180deg); }
+  .profile-panel { display: none; padding: 0 16px 16px 66px; background: var(--bg3); border-top: 0.5px solid var(--border); }
+  .profile-panel.open { display: block; }
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding-top: 4px; }
+  .pfield { padding: 8px 12px 8px 0; border-bottom: 0.5px solid var(--border); }
+  .pfield:nth-last-child(-n+2) { border-bottom: none; }
+  .pfield-full { grid-column: span 2; }
+  .pfield-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+  .pfield-value { font-size: 13px; color: var(--text); }
+  .empty-state { text-align: center; padding: 4rem; color: var(--text3); }
+  .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+  .error-box { background: #FCEBEB; border: 0.5px solid #F09595; border-radius: var(--radius); padding: 12px 16px; font-size: 13px; color: #501313; margin-bottom: 1rem; line-height: 1.6; }
+  .spinning { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 700px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .source-grid { grid-template-columns: repeat(2, 1fr); }
+    .main { padding: 1rem; }
+    .profile-grid { grid-template-columns: 1fr; }
+    .pfield-full { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">
+    <span class="nav-badge">TATA AIA</span>
+    <span class="nav-title">Client Dashboard</span>
+  </div>
+  <div class="nav-right">
+    <span class="last-updated" id="last-updated"></span>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+      <i class="ti ti-refresh" id="refresh-icon"></i> Refresh
+    </button>
+  </div>
+</nav>
+
+<div class="main">
+  <div id="error-area"></div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total submissions</div>
+      <div class="metric-value" id="m-total">—</div>
+      <div class="metric-sub">All time</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">This week</div>
+      <div class="metric-value" id="m-week">—</div>
+      <div class="metric-sub">Last 7 days</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Top source</div>
+      <div class="metric-value sm" id="m-source">—</div>
+      <div class="metric-sub" id="m-source-sub"></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Latest client</div>
+      <div class="metric-value sm" id="m-latest">—</div>
+      <div class="metric-sub" id="m-latest-sub"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Submissions by source</div>
+  <div class="source-grid" id="source-grid">
+    <div class="source-card"><div class="source-name">WhatsApp personal</div><div class="source-count">—</div></div>
+    <div class="source-card"><div class="source-name">WhatsApp broadcast</div><div class="source-count">—</div></div>
+    <div class="source-card"><div class="source-name">LinkedIn</div><div class="source-count">—</div></div>
+    <div class="source-card"><div class="source-name">Email</div><div class="source-count">—</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="search-input" placeholder="Search by name, mobile, email, employer…" oninput="renderClients()">
+    </div>
+    <select class="filter-select" id="source-filter" onchange="renderClients()">
+      <option value="">All sources</option>
+      <option value="whatsapp">WhatsApp</option>
+      <option value="linkedin">LinkedIn</option>
+      <option value="email">Email</option>
+      <option value="unknown">Unknown / Direct</option>
+    </select>
+    <span class="client-count-label" id="client-count"></span>
+  </div>
+
+  <div class="client-table" id="client-list">
+    <div class="empty-state"><i class="ti ti-loader"></i><p>Loading clients…</p></div>
+  </div>
+</div>
+
+<script>
+const SHEET_ID = '1V63NxZ5Rv4H092eLwtlSaJaZRXh4fwggDAbB_pgPAxI';
+const SHEET_NAME = 'Form_Responses';
+const API_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+let allClients = [];
+let expandedRow = null;
+let nameKey = '';
+
+function initials(name) {
+  if (!name) return '?';
+  return name.trim().split(' ').slice(0,2).map(w => w[0] || '').join('').toUpperCase();
+}
+
+function sourcePill(utm) {
+  if (!utm) return `<span class="pill pill-un">Direct</span>`;
+  const u = utm.toLowerCase();
+  if (u.includes('whatsapp') && u.includes('personal')) return `<span class="pill pill-wa">WA Personal</span>`;
+  if (u.includes('whatsapp') && u.includes('broadcast')) return `<span class="pill pill-wa">WA Broadcast</span>`;
+  if (u.includes('whatsapp')) return `<span class="pill pill-wa">WhatsApp</span>`;
+  if (u.includes('linkedin')) return `<span class="pill pill-li">LinkedIn</span>`;
+  if (u.includes('email')) return `<span class="pill pill-em">Email</span>`;
+  return `<span class="pill pill-un">Other</span>`;
+}
+
+function sourceLabel(utm) {
+  if (!utm) return 'unknown';
+  const u = utm.toLowerCase();
+  if (u.includes('whatsapp') && u.includes('personal')) return 'WhatsApp personal';
+  if (u.includes('whatsapp') && u.includes('broadcast')) return 'WhatsApp broadcast';
+  if (u.includes('whatsapp')) return 'WhatsApp';
+  if (u.includes('linkedin')) return 'LinkedIn';
+  if (u.includes('email')) return 'Email';
+  return 'Other';
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  try { return new Date(ts).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}); }
+  catch(e) { return ts; }
+}
+
+function daysAgo(ts) {
+  if (!ts) return '';
+  try {
+    const days = Math.floor((Date.now() - new Date(ts).getTime()) / 86400000);
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+  } catch(e) { return ''; }
+}
+
+function isThisWeek(ts) {
+  if (!ts) return false;
+  try { return (Date.now() - new Date(ts).getTime()) < 7 * 86400000; }
+  catch(e) { return false; }
+}
+
+function getField(client, ...keys) {
+  for (const k of keys) {
+    if (client[k] !== undefined && client[k] !== '') return client[k];
+  }
+  return '—';
+}
+
+async function loadData() {
+  const btn = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.disabled = true;
+  icon.classList.add('spinning');
+  document.getElementById('error-area').innerHTML = '';
+
+  try {
+    const res = await fetch(API_URL);
+    const text = await res.text();
+    const json = JSON.parse(text.replace(/^[^{]*({.*})[^}]*$/, '$1'));
+    const cols = json.table.cols.map(c => c.label);
+    const rows = json.table.rows || [];
+
+    nameKey = cols.find(c => c.toLowerCase().includes('full name')) || cols[1] || '';
+
+    allClients = rows.map(row => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const cell = row.c && row.c[i];
+        obj[col] = cell ? (cell.f || String(cell.v || '')) : '';
+      });
+      return obj;
+    }).filter(c => c[nameKey] && c[nameKey].trim() !== '');
+
+    updateMetrics();
+    renderClients();
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+  } catch(err) {
+    document.getElementById('error-area').innerHTML = `
+      <div class="error-box">
+        <strong>Could not load sheet data.</strong> Make sure the Google Sheet is shared as "Anyone with the link — Viewer".<br>
+        <small>${err.message}</small>
+      </div>`;
+    document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i><p>No data loaded</p></div>';
+  } finally {
+    btn.disabled = false;
+    icon.classList.remove('spinning');
+  }
+}
+
+function updateMetrics() {
+  document.getElementById('m-total').textContent = allClients.length;
+  document.getElementById('m-week').textContent = allClients.filter(c => isThisWeek(c['Timestamp'])).length;
+
+  const sourceCounts = {};
+  allClients.forEach(c => {
+    const s = sourceLabel(c['Source (UTM)']);
+    sourceCounts[s] = (sourceCounts[s] || 0) + 1;
+  });
+
+  const top = Object.entries(sourceCounts).sort((a,b) => b[1]-a[1])[0];
+  document.getElementById('m-source').textContent = top ? top[0] : '—';
+  document.getElementById('m-source-sub').textContent = top ? `${top[1]} submission${top[1]!==1?'s':''}` : '';
+
+  const latest = allClients[0];
+  if (latest) {
+    document.getElementById('m-latest').textContent = (latest[nameKey] || '').split(' ')[0] || '—';
+    document.getElementById('m-latest-sub').textContent = daysAgo(latest['Timestamp']);
+  }
+
+  const sources = [
+    { label: 'WhatsApp personal', key: 'WhatsApp personal' },
+    { label: 'WhatsApp broadcast', key: 'WhatsApp broadcast' },
+    { label: 'LinkedIn', key: 'LinkedIn' },
+    { label: 'Email', key: 'Email' },
+  ];
+  const total = allClients.length;
+  document.getElementById('source-grid').innerHTML = sources.map(s => {
+    const count = sourceCounts[s.key] || 0;
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    return `<div class="source-card">
+      <div class="source-name">${s.label}</div>
+      <div class="source-count">${count}</div>
+      <div class="source-bar-wrap"><div class="source-bar" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderClients() {
+  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  const sf = (document.getElementById('source-filter').value || '').toLowerCase();
+
+  const filtered = allClients.filter(c => {
+    const name = (c[nameKey] || '').toLowerCase();
+    const mobile = (c['Mobile number'] || '').toLowerCase();
+    const employer = (c['Employer / Business firm name'] || '').toLowerCase();
+    const email = (c['Email ID'] || '').toLowerCase();
+    const matchQ = !q || name.includes(q) || mobile.includes(q) || employer.includes(q) || email.includes(q);
+    const utmSrc = (c['Source (UTM)'] || '').toLowerCase();
+    const matchS = !sf || (sf === 'unknown' ? (!utmSrc || utmSrc === 'unknown') : utmSrc.includes(sf));
+    return matchQ && matchS;
+  });
+
+  document.getElementById('client-count').textContent = `${filtered.length} client${filtered.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-users"></i><p>No clients found</p></div>';
+    return;
+  }
+
+  document.getElementById('client-list').innerHTML = filtered.map((c, i) => {
+    const name = c[nameKey] || 'Unknown';
+    const mobile = c['Mobile number'] || '—';
+    const email = c['Email ID'] || '—';
+    const employer = c['Employer / Business firm name'] || '';
+    const empType = c['Salaried / Self-employed'] || '';
+    const ts = c['Timestamp'];
+    const utm = c['Source (UTM)'] || '';
+
+    return `<div class="client-row" id="crow-${i}">
+      <div class="client-row-inner" onclick="toggleProfile(${i})">
+        <div class="avatar">${initials(name)}</div>
+        <div class="client-info">
+          <div class="client-name-row">
+            <span class="client-name">${name}</span>
+            ${sourcePill(utm)}
+          </div>
+          <div class="client-meta">
+            <span class="cmeta"><i class="ti ti-phone"></i>${mobile}</span>
+            <span class="cmeta"><i class="ti ti-mail"></i>${email}</span>
+            ${employer ? `<span class="cmeta"><i class="ti ti-building"></i>${employer}${empType ? ' · ' + empType : ''}</span>` : ''}
+            ${ts ? `<span class="cmeta"><i class="ti ti-calendar"></i>${fmtDate(ts)}</span>` : ''}
+          </div>
+        </div>
+        <i class="ti ti-chevron-down chev" id="chev-${i}"></i>
+      </div>
+      <div class="profile-panel" id="panel-${i}">
+        <div class="profile-grid">
+          <div class="pfield"><div class="pfield-label">Date of birth</div><div class="pfield-value">${getField(c,'Date of birth')}</div></div>
+          <div class="pfield"><div class="pfield-label">Height / Weight</div><div class="pfield-value">${getField(c,'Height')} / ${getField(c,'Weight')}</div></div>
+          <div class="pfield"><div class="pfield-label">Education</div><div class="pfield-value">${getField(c,'Highest education')}</div></div>
+          <div class="pfield"><div class="pfield-label">Occupation</div><div class="pfield-value">${getField(c,'Occupation')}</div></div>
+          <div class="pfield"><div class="pfield-label">Employment type</div><div class="pfield-value">${getField(c,'Salaried / Self-employed')}</div></div>
+          <div class="pfield"><div class="pfield-label">Employer / Firm</div><div class="pfield-value">${getField(c,'Employer / Business firm name')}</div></div>
+          <div class="pfield"><div class="pfield-label">Mother's name</div><div class="pfield-value">${getField(c,"Mother's name")}</div></div>
+          <div class="pfield"><div class="pfield-label">Marital status</div><div class="pfield-value">${getField(c,'Marital status')}</div></div>
+          <div class="pfield"><div class="pfield-label">Nominee name</div><div class="pfield-value">${getField(c,'Nominee name')}</div></div>
+          <div class="pfield"><div class="pfield-label">Nominee DOB</div><div class="pfield-value">${getField(c,'Nominee date of birth')}</div></div>
+          <div class="pfield pfield-full"><div class="pfield-label">Address with landmark</div><div class="pfield-value">${getField(c,'Address with landmark')}</div></div>
+          <div class="pfield pfield-full"><div class="pfield-label">Previous policy details</div><div class="pfield-value">${getField(c,'Previous policy details')}</div></div>
+          <div class="pfield"><div class="pfield-label">Source (UTM)</div><div class="pfield-value">${getField(c,'Source (UTM)')}</div></div>
+          <div class="pfield"><div class="pfield-label">Submitted on</div><div class="pfield-value">${fmtDate(ts)}</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProfile(i) {
+  const panel = document.getElementById(`panel-${i}`);
+  const chev = document.getElementById(`chev-${i}`);
+  const isOpen = panel.classList.contains('open');
+
+  if (expandedRow !== null && expandedRow !== i) {
+    document.getElementById(`panel-${expandedRow}`).classList.remove('open');
+    document.getElementById(`chev-${expandedRow}`).classList.remove('open');
+  }
+
+  panel.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+  expandedRow = isOpen ? null : i;
+}
+
+loadData();
+</script>
+</body>
+</html>
