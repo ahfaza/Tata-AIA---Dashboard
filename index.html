@@ -165,7 +165,11 @@ function sourceLabel(utm) {
 }
 function fmtDate(ts) {
   if (!ts) return '—';
-  try { return new Date(ts).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}); }
+  try {
+    var d = new Date(ts);
+    if (isNaN(d.getTime())) return ts;
+    return d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getFullYear();
+  }
   catch(e) { return ts; }
 }
 function daysAgo(ts) {
