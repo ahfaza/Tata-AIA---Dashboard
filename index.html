@@ -8,19 +8,11 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #f9f8f6;
-    --bg2: #ffffff;
-    --bg3: #f1f0ec;
-    --text: #1a1a18;
-    --text2: #6b6a64;
-    --text3: #a0a09a;
-    --border: rgba(0,0,0,0.1);
-    --border2: rgba(0,0,0,0.18);
-    --green: #1D9E75;
-    --green-light: #E1F5EE;
-    --green-dark: #085041;
-    --radius: 8px;
-    --radius-lg: 12px;
+    --bg: #f9f8f6; --bg2: #ffffff; --bg3: #f1f0ec;
+    --text: #1a1a18; --text2: #6b6a64; --text3: #a0a09a;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+    --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
+    --radius: 8px; --radius-lg: 12px;
   }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   .topnav { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; }
@@ -97,7 +89,6 @@
 </style>
 </head>
 <body>
-
 <nav class="topnav">
   <div class="nav-brand">
     <span class="nav-badge">TATA AIA</span>
@@ -110,33 +101,14 @@
     </button>
   </div>
 </nav>
-
 <div class="main">
   <div id="error-area"></div>
-
   <div class="metrics">
-    <div class="metric">
-      <div class="metric-label">Total submissions</div>
-      <div class="metric-value" id="m-total">—</div>
-      <div class="metric-sub">All time</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">This week</div>
-      <div class="metric-value" id="m-week">—</div>
-      <div class="metric-sub">Last 7 days</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Top source</div>
-      <div class="metric-value sm" id="m-source">—</div>
-      <div class="metric-sub" id="m-source-sub"></div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Latest client</div>
-      <div class="metric-value sm" id="m-latest">—</div>
-      <div class="metric-sub" id="m-latest-sub"></div>
-    </div>
+    <div class="metric"><div class="metric-label">Total submissions</div><div class="metric-value" id="m-total">—</div><div class="metric-sub">All time</div></div>
+    <div class="metric"><div class="metric-label">This week</div><div class="metric-value" id="m-week">—</div><div class="metric-sub">Last 7 days</div></div>
+    <div class="metric"><div class="metric-label">Top source</div><div class="metric-value sm" id="m-source">—</div><div class="metric-sub" id="m-source-sub"></div></div>
+    <div class="metric"><div class="metric-label">Latest client</div><div class="metric-value sm" id="m-latest">—</div><div class="metric-sub" id="m-latest-sub"></div></div>
   </div>
-
   <div class="section-label">Submissions by source</div>
   <div class="source-grid" id="source-grid">
     <div class="source-card"><div class="source-name">WhatsApp personal</div><div class="source-count">—</div></div>
@@ -144,7 +116,6 @@
     <div class="source-card"><div class="source-name">LinkedIn</div><div class="source-count">—</div></div>
     <div class="source-card"><div class="source-name">Email</div><div class="source-count">—</div></div>
   </div>
-
   <div class="controls">
     <div class="search-wrap">
       <i class="ti ti-search"></i>
@@ -159,35 +130,28 @@
     </select>
     <span class="client-count-label" id="client-count"></span>
   </div>
-
   <div class="client-table" id="client-list">
     <div class="empty-state"><i class="ti ti-loader"></i><p>Loading clients…</p></div>
   </div>
 </div>
-
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbylskaOOvfiZlLu4lZ1m_gPCgAYTCAsaZ95McKOilaqamrkqyHvei18CV0WzC0Bao9C5g/exec';
-
-let allClients = [];
-let expandedRow = null;
-let nameKey = '';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylskaOOvfiZlLu4lZ1m_gPCgAYTCAsaZ95McKOilaqamrkqyHvei18CV0WzC0Bao9C5g/exec';
+let allClients = [], expandedRow = null, nameKey = '';
 
 function initials(name) {
   if (!name) return '?';
-  return name.trim().split(' ').slice(0,2).map(w => w[0] || '').join('').toUpperCase();
+  return name.trim().split(' ').slice(0,2).map(w => w[0]||'').join('').toUpperCase();
 }
-
 function sourcePill(utm) {
-  if (!utm) return `<span class="pill pill-un">Direct</span>`;
+  if (!utm) return '<span class="pill pill-un">Direct</span>';
   const u = utm.toLowerCase();
-  if (u.includes('whatsapp') && u.includes('personal')) return `<span class="pill pill-wa">WA Personal</span>`;
-  if (u.includes('whatsapp') && u.includes('broadcast')) return `<span class="pill pill-wa">WA Broadcast</span>`;
-  if (u.includes('whatsapp')) return `<span class="pill pill-wa">WhatsApp</span>`;
-  if (u.includes('linkedin')) return `<span class="pill pill-li">LinkedIn</span>`;
-  if (u.includes('email')) return `<span class="pill pill-em">Email</span>`;
-  return `<span class="pill pill-un">Other</span>`;
+  if (u.includes('whatsapp') && u.includes('personal')) return '<span class="pill pill-wa">WA Personal</span>';
+  if (u.includes('whatsapp') && u.includes('broadcast')) return '<span class="pill pill-wa">WA Broadcast</span>';
+  if (u.includes('whatsapp')) return '<span class="pill pill-wa">WhatsApp</span>';
+  if (u.includes('linkedin')) return '<span class="pill pill-li">LinkedIn</span>';
+  if (u.includes('email')) return '<span class="pill pill-em">Email</span>';
+  return '<span class="pill pill-un">Other</span>';
 }
-
 function sourceLabel(utm) {
   if (!utm) return 'unknown';
   const u = utm.toLowerCase();
@@ -198,198 +162,173 @@ function sourceLabel(utm) {
   if (u.includes('email')) return 'Email';
   return 'Other';
 }
-
 function fmtDate(ts) {
   if (!ts) return '—';
-  try { return new Date(ts).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}); }
+  try { return new Date(ts).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}); }
   catch(e) { return ts; }
 }
-
 function daysAgo(ts) {
   if (!ts) return '';
   try {
     const days = Math.floor((Date.now() - new Date(ts).getTime()) / 86400000);
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
-    return `${days} days ago`;
+    return days + ' days ago';
   } catch(e) { return ''; }
 }
-
 function isThisWeek(ts) {
   if (!ts) return false;
   try { return (Date.now() - new Date(ts).getTime()) < 7 * 86400000; }
   catch(e) { return false; }
 }
-
-function getField(client, ...keys) {
-  for (const k of keys) {
-    if (client[k] !== undefined && client[k] !== '') return client[k];
+function getField(client) {
+  var keys = Array.prototype.slice.call(arguments, 1);
+  for (var i = 0; i < keys.length; i++) {
+    if (client[keys[i]] !== undefined && client[keys[i]] !== '') return client[keys[i]];
   }
   return '—';
 }
-
-async function loadData() {
-  const btn = document.getElementById('refresh-btn');
-  const icon = document.getElementById('refresh-icon');
+window.handleData = function(json) {
+  clearTimeout(window._jsonpTimeout);
+  var rows = json.data || [];
+  if (rows.length === 0) {
+    allClients = [];
+  } else {
+    nameKey = Object.keys(rows[0]).find(function(k){ return k.toLowerCase().includes('full name'); }) || Object.keys(rows[0])[1] || '';
+    allClients = rows.filter(function(c){ return c[nameKey] && c[nameKey].trim() !== ''; });
+  }
+  updateMetrics();
+  renderClients();
+  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('error-area').innerHTML = '';
+  document.getElementById('refresh-btn').disabled = false;
+  document.getElementById('refresh-icon').classList.remove('spinning');
+};
+function loadData() {
+  var btn = document.getElementById('refresh-btn');
+  var icon = document.getElementById('refresh-icon');
   btn.disabled = true;
   icon.classList.add('spinning');
   document.getElementById('error-area').innerHTML = '';
-
-  try {
-    const res = await fetch(API_URL);
-    const json = await res.json();
-    const rows = json.data || [];
-
-    if (rows.length === 0) {
-      allClients = [];
-      updateMetrics();
-      renderClients();
-      document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-      return;
-    }
-
-    nameKey = Object.keys(rows[0]).find(k => k.toLowerCase().includes('full name')) || Object.keys(rows[0])[1] || '';
-    allClients = rows.filter(c => c[nameKey] && c[nameKey].trim() !== '');
-
-    updateMetrics();
-    renderClients();
-    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-  } catch(err) {
-    document.getElementById('error-area').innerHTML = `
-      <div class="error-box">
-        <strong>Could not load data.</strong> The Apps Script API may still be deploying — wait 1 minute and try refreshing.<br>
-        <small>${err.message}</small>
-      </div>`;
+  var old = document.getElementById('jsonp-script');
+  if (old) old.remove();
+  window._jsonpTimeout = setTimeout(function() {
+    document.getElementById('error-area').innerHTML = '<div class="error-box"><strong>Could not load data.</strong> Request timed out. Check Apps Script deployment and try again.</div>';
     document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i><p>No data loaded</p></div>';
-  } finally {
     btn.disabled = false;
     icon.classList.remove('spinning');
-  }
+  }, 10000);
+  var script = document.createElement('script');
+  script.id = 'jsonp-script';
+  script.src = SCRIPT_URL + '?callback=handleData&t=' + Date.now();
+  script.onerror = function() {
+    clearTimeout(window._jsonpTimeout);
+    document.getElementById('error-area').innerHTML = '<div class="error-box"><strong>Could not load data.</strong> Script failed to load. Check your Apps Script deployment settings.</div>';
+    document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i><p>No data loaded</p></div>';
+    btn.disabled = false;
+    icon.classList.remove('spinning');
+  };
+  document.body.appendChild(script);
 }
-
 function updateMetrics() {
   document.getElementById('m-total').textContent = allClients.length;
-  document.getElementById('m-week').textContent = allClients.filter(c => isThisWeek(c['Timestamp'])).length;
-
-  const sourceCounts = {};
-  allClients.forEach(c => {
-    const s = sourceLabel(c['Source (UTM)']);
+  document.getElementById('m-week').textContent = allClients.filter(function(c){ return isThisWeek(c['Timestamp']); }).length;
+  var sourceCounts = {};
+  allClients.forEach(function(c) {
+    var s = sourceLabel(c['Source (UTM)']);
     sourceCounts[s] = (sourceCounts[s] || 0) + 1;
   });
-
-  const top = Object.entries(sourceCounts).sort((a,b) => b[1]-a[1])[0];
+  var top = Object.entries(sourceCounts).sort(function(a,b){ return b[1]-a[1]; })[0];
   document.getElementById('m-source').textContent = top ? top[0] : '—';
-  document.getElementById('m-source-sub').textContent = top ? `${top[1]} submission${top[1]!==1?'s':''}` : '';
-
-  const latest = allClients[0];
+  document.getElementById('m-source-sub').textContent = top ? top[1] + ' submission' + (top[1]!==1?'s':'') : '';
+  var latest = allClients[0];
   if (latest) {
-    document.getElementById('m-latest').textContent = (latest[nameKey] || '').split(' ')[0] || '—';
+    document.getElementById('m-latest').textContent = (latest[nameKey]||'').split(' ')[0] || '—';
     document.getElementById('m-latest-sub').textContent = daysAgo(latest['Timestamp']);
   }
-
-  const sources = [
-    { label: 'WhatsApp personal', key: 'WhatsApp personal' },
-    { label: 'WhatsApp broadcast', key: 'WhatsApp broadcast' },
-    { label: 'LinkedIn', key: 'LinkedIn' },
-    { label: 'Email', key: 'Email' },
+  var sources = [
+    {label:'WhatsApp personal',key:'WhatsApp personal'},
+    {label:'WhatsApp broadcast',key:'WhatsApp broadcast'},
+    {label:'LinkedIn',key:'LinkedIn'},
+    {label:'Email',key:'Email'}
   ];
-  const total = allClients.length;
-  document.getElementById('source-grid').innerHTML = sources.map(s => {
-    const count = sourceCounts[s.key] || 0;
-    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-    return `<div class="source-card">
-      <div class="source-name">${s.label}</div>
-      <div class="source-count">${count}</div>
-      <div class="source-bar-wrap"><div class="source-bar" style="width:${pct}%"></div></div>
-    </div>`;
+  var total = allClients.length;
+  document.getElementById('source-grid').innerHTML = sources.map(function(s) {
+    var count = sourceCounts[s.key] || 0;
+    var pct = total > 0 ? Math.round((count/total)*100) : 0;
+    return '<div class="source-card"><div class="source-name">'+s.label+'</div><div class="source-count">'+count+'</div><div class="source-bar-wrap"><div class="source-bar" style="width:'+pct+'%"></div></div></div>';
   }).join('');
 }
-
 function renderClients() {
-  const q = (document.getElementById('search-input').value || '').toLowerCase();
-  const sf = (document.getElementById('source-filter').value || '').toLowerCase();
-
-  const filtered = allClients.filter(c => {
-    const name = (c[nameKey] || '').toLowerCase();
-    const mobile = (c['Mobile number'] || '').toLowerCase();
-    const employer = (c['Employer / Business firm name'] || '').toLowerCase();
-    const email = (c['Email ID'] || '').toLowerCase();
-    const matchQ = !q || name.includes(q) || mobile.includes(q) || employer.includes(q) || email.includes(q);
-    const utmSrc = (c['Source (UTM)'] || '').toLowerCase();
-    const matchS = !sf || (sf === 'unknown' ? (!utmSrc || utmSrc === 'unknown') : utmSrc.includes(sf));
+  var q = (document.getElementById('search-input').value||'').toLowerCase();
+  var sf = (document.getElementById('source-filter').value||'').toLowerCase();
+  var filtered = allClients.filter(function(c) {
+    var name = (c[nameKey]||'').toLowerCase();
+    var mobile = (c['Mobile number']||'').toLowerCase();
+    var employer = (c['Employer / Business firm name']||'').toLowerCase();
+    var email = (c['Email ID']||'').toLowerCase();
+    var matchQ = !q || name.includes(q) || mobile.includes(q) || employer.includes(q) || email.includes(q);
+    var utmSrc = (c['Source (UTM)']||'').toLowerCase();
+    var matchS = !sf || (sf==='unknown' ? (!utmSrc||utmSrc==='unknown') : utmSrc.includes(sf));
     return matchQ && matchS;
   });
-
-  document.getElementById('client-count').textContent = `${filtered.length} client${filtered.length !== 1 ? 's' : ''}`;
-
+  document.getElementById('client-count').textContent = filtered.length + ' client' + (filtered.length!==1?'s':'');
   if (!filtered.length) {
     document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-users"></i><p>No clients yet — share your form link to get started</p></div>';
     return;
   }
-
-  document.getElementById('client-list').innerHTML = filtered.map((c, i) => {
-    const name = c[nameKey] || 'Unknown';
-    const mobile = c['Mobile number'] || '—';
-    const email = c['Email ID'] || '—';
-    const employer = c['Employer / Business firm name'] || '';
-    const empType = c['Salaried / Self-employed'] || '';
-    const ts = c['Timestamp'];
-    const utm = c['Source (UTM)'] || '';
-
-    return `<div class="client-row" id="crow-${i}">
-      <div class="client-row-inner" onclick="toggleProfile(${i})">
-        <div class="avatar">${initials(name)}</div>
-        <div class="client-info">
-          <div class="client-name-row">
-            <span class="client-name">${name}</span>
-            ${sourcePill(utm)}
-          </div>
-          <div class="client-meta">
-            <span class="cmeta"><i class="ti ti-phone"></i>${mobile}</span>
-            <span class="cmeta"><i class="ti ti-mail"></i>${email}</span>
-            ${employer ? `<span class="cmeta"><i class="ti ti-building"></i>${employer}${empType ? ' · ' + empType : ''}</span>` : ''}
-            ${ts ? `<span class="cmeta"><i class="ti ti-calendar"></i>${fmtDate(ts)}</span>` : ''}
-          </div>
-        </div>
-        <i class="ti ti-chevron-down chev" id="chev-${i}"></i>
-      </div>
-      <div class="profile-panel" id="panel-${i}">
-        <div class="profile-grid">
-          <div class="pfield"><div class="pfield-label">Date of birth</div><div class="pfield-value">${getField(c,'Date of birth')}</div></div>
-          <div class="pfield"><div class="pfield-label">Height / Weight</div><div class="pfield-value">${getField(c,'Height')} / ${getField(c,'Weight')}</div></div>
-          <div class="pfield"><div class="pfield-label">Education</div><div class="pfield-value">${getField(c,'Highest education')}</div></div>
-          <div class="pfield"><div class="pfield-label">Occupation</div><div class="pfield-value">${getField(c,'Occupation')}</div></div>
-          <div class="pfield"><div class="pfield-label">Employment type</div><div class="pfield-value">${getField(c,'Salaried / Self-employed')}</div></div>
-          <div class="pfield"><div class="pfield-label">Employer / Firm</div><div class="pfield-value">${getField(c,'Employer / Business firm name')}</div></div>
-          <div class="pfield"><div class="pfield-label">Mother's name</div><div class="pfield-value">${getField(c,"Mother's name")}</div></div>
-          <div class="pfield"><div class="pfield-label">Marital status</div><div class="pfield-value">${getField(c,'Marital status')}</div></div>
-          <div class="pfield"><div class="pfield-label">Nominee name</div><div class="pfield-value">${getField(c,'Nominee name')}</div></div>
-          <div class="pfield"><div class="pfield-label">Nominee DOB</div><div class="pfield-value">${getField(c,'Nominee date of birth')}</div></div>
-          <div class="pfield pfield-full"><div class="pfield-label">Address with landmark</div><div class="pfield-value">${getField(c,'Address with landmark')}</div></div>
-          <div class="pfield pfield-full"><div class="pfield-label">Previous policy details</div><div class="pfield-value">${getField(c,'Previous policy details')}</div></div>
-          <div class="pfield"><div class="pfield-label">Source (UTM)</div><div class="pfield-value">${getField(c,'Source (UTM)')}</div></div>
-          <div class="pfield"><div class="pfield-label">Submitted on</div><div class="pfield-value">${fmtDate(ts)}</div></div>
-        </div>
-      </div>
-    </div>`;
+  document.getElementById('client-list').innerHTML = filtered.map(function(c, i) {
+    var name = c[nameKey]||'Unknown';
+    var mobile = c['Mobile number']||'—';
+    var email = c['Email ID']||'—';
+    var employer = c['Employer / Business firm name']||'';
+    var empType = c['Salaried / Self-employed']||'';
+    var ts = c['Timestamp'];
+    var utm = c['Source (UTM)']||'';
+    return '<div class="client-row" id="crow-'+i+'">'
+      +'<div class="client-row-inner" onclick="toggleProfile('+i+')">'
+      +'<div class="avatar">'+initials(name)+'</div>'
+      +'<div class="client-info">'
+      +'<div class="client-name-row"><span class="client-name">'+name+'</span>'+sourcePill(utm)+'</div>'
+      +'<div class="client-meta">'
+      +'<span class="cmeta"><i class="ti ti-phone"></i>'+mobile+'</span>'
+      +'<span class="cmeta"><i class="ti ti-mail"></i>'+email+'</span>'
+      +(employer?'<span class="cmeta"><i class="ti ti-building"></i>'+employer+(empType?' · '+empType:'')+'</span>':'')
+      +(ts?'<span class="cmeta"><i class="ti ti-calendar"></i>'+fmtDate(ts)+'</span>':'')
+      +'</div></div>'
+      +'<i class="ti ti-chevron-down chev" id="chev-'+i+'"></i>'
+      +'</div>'
+      +'<div class="profile-panel" id="panel-'+i+'">'
+      +'<div class="profile-grid">'
+      +'<div class="pfield"><div class="pfield-label">Date of birth</div><div class="pfield-value">'+getField(c,'Date of birth')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Height / Weight</div><div class="pfield-value">'+getField(c,'Height')+' / '+getField(c,'Weight')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Education</div><div class="pfield-value">'+getField(c,'Highest education')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Occupation</div><div class="pfield-value">'+getField(c,'Occupation')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Employment type</div><div class="pfield-value">'+getField(c,'Salaried / Self-employed')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Employer / Firm</div><div class="pfield-value">'+getField(c,'Employer / Business firm name')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Mother\'s name</div><div class="pfield-value">'+getField(c,"Mother's name")+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Marital status</div><div class="pfield-value">'+getField(c,'Marital status')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Nominee name</div><div class="pfield-value">'+getField(c,'Nominee name')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Nominee DOB</div><div class="pfield-value">'+getField(c,'Nominee date of birth')+'</div></div>'
+      +'<div class="pfield pfield-full"><div class="pfield-label">Address with landmark</div><div class="pfield-value">'+getField(c,'Address with landmark')+'</div></div>'
+      +'<div class="pfield pfield-full"><div class="pfield-label">Previous policy details</div><div class="pfield-value">'+getField(c,'Previous policy details')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Source (UTM)</div><div class="pfield-value">'+getField(c,'Source (UTM)')+'</div></div>'
+      +'<div class="pfield"><div class="pfield-label">Submitted on</div><div class="pfield-value">'+fmtDate(ts)+'</div></div>'
+      +'</div></div></div>';
   }).join('');
 }
-
 function toggleProfile(i) {
-  const panel = document.getElementById(`panel-${i}`);
-  const chev = document.getElementById(`chev-${i}`);
-  const isOpen = panel.classList.contains('open');
-
+  var panel = document.getElementById('panel-'+i);
+  var chev = document.getElementById('chev-'+i);
+  var isOpen = panel.classList.contains('open');
   if (expandedRow !== null && expandedRow !== i) {
-    document.getElementById(`panel-${expandedRow}`).classList.remove('open');
-    document.getElementById(`chev-${expandedRow}`).classList.remove('open');
+    document.getElementById('panel-'+expandedRow).classList.remove('open');
+    document.getElementById('chev-'+expandedRow).classList.remove('open');
   }
-
   panel.classList.toggle('open', !isOpen);
   chev.classList.toggle('open', !isOpen);
   expandedRow = isOpen ? null : i;
 }
-
 loadData();
 </script>
 </body>
