@@ -136,6 +136,7 @@
 </div>
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGGmIO9nJLN91MSMvEm1spZ4rYQlT5ZSKKH5GShOrweUV3HA7k87z5QbQPaizHt9Jp/exec';
+const PROXY = 'https://corsproxy.io/?';
 let allClients = [], expandedRow = null, nameKey = '';
 
 function initials(name) {
@@ -188,88 +189,77 @@ function getField(client) {
   }
   return '—';
 }
-window.handleData = function(json) {
-  clearTimeout(window._jsonpTimeout);
-  var rows = json.data || [];
-  if (rows.length === 0) {
-    allClients = [];
-  } else {
-    nameKey = Object.keys(rows[0]).find(function(k){ return k.toLowerCase().includes('full name'); }) || Object.keys(rows[0])[1] || '';
-    allClients = rows.filter(function(c){ return c[nameKey] && c[nameKey].trim() !== ''; });
-  }
-  updateMetrics();
-  renderClients();
-  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
-  document.getElementById('error-area').innerHTML = '';
-  document.getElementById('refresh-btn').disabled = false;
-  document.getElementById('refresh-icon').classList.remove('spinning');
-};
-function loadData() {
-  var btn = document.getElementById('refresh-btn');
-  var icon = document.getElementById('refresh-icon');
+async function loadData() {
+  const btn = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
   btn.disabled = true;
   icon.classList.add('spinning');
   document.getElementById('error-area').innerHTML = '';
-  var old = document.getElementById('jsonp-script');
-  if (old) old.remove();
-  window._jsonpTimeout = setTimeout(function() {
-    document.getElementById('error-area').innerHTML = '<div class="error-box"><strong>Could not load data.</strong> Request timed out. Check Apps Script deployment and try again.</div>';
+
+  try {
+    const url = PROXY + encodeURIComponent(SCRIPT_URL + '?callback=x');
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.replace(/^x\(/, '').replace(/\)$/, ''));
+    const rows = json.data || [];
+
+    if (rows.length === 0) {
+      allClients = [];
+    } else {
+      nameKey = Object.keys(rows[0]).find(k => k.toLowerCase().includes('full name')) || Object.keys(rows[0])[1] || '';
+      allClients = rows.filter(c => c[nameKey] && c[nameKey].trim() !== '');
+    }
+    updateMetrics();
+    renderClients();
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+  } catch(err) {
+    document.getElementById('error-area').innerHTML = '<div class="error-box"><strong>Could not load data.</strong> ' + err.message + '</div>';
     document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i><p>No data loaded</p></div>';
+  } finally {
     btn.disabled = false;
     icon.classList.remove('spinning');
-  }, 10000);
-  var script = document.createElement('script');
-  script.id = 'jsonp-script';
-  script.src = SCRIPT_URL + '?callback=handleData&t=' + Date.now();
-  script.onerror = function() {
-    clearTimeout(window._jsonpTimeout);
-    document.getElementById('error-area').innerHTML = '<div class="error-box"><strong>Could not load data.</strong> Script failed to load. Check your Apps Script deployment settings.</div>';
-    document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-wifi-off"></i><p>No data loaded</p></div>';
-    btn.disabled = false;
-    icon.classList.remove('spinning');
-  };
-  document.body.appendChild(script);
+  }
 }
 function updateMetrics() {
   document.getElementById('m-total').textContent = allClients.length;
-  document.getElementById('m-week').textContent = allClients.filter(function(c){ return isThisWeek(c['Timestamp']); }).length;
-  var sourceCounts = {};
-  allClients.forEach(function(c) {
-    var s = sourceLabel(c['Source (UTM)']);
+  document.getElementById('m-week').textContent = allClients.filter(c => isThisWeek(c['Timestamp'])).length;
+  const sourceCounts = {};
+  allClients.forEach(c => {
+    const s = sourceLabel(c['Source (UTM)']);
     sourceCounts[s] = (sourceCounts[s] || 0) + 1;
   });
-  var top = Object.entries(sourceCounts).sort(function(a,b){ return b[1]-a[1]; })[0];
+  const top = Object.entries(sourceCounts).sort((a,b) => b[1]-a[1])[0];
   document.getElementById('m-source').textContent = top ? top[0] : '—';
   document.getElementById('m-source-sub').textContent = top ? top[1] + ' submission' + (top[1]!==1?'s':'') : '';
-  var latest = allClients[0];
+  const latest = allClients[0];
   if (latest) {
     document.getElementById('m-latest').textContent = (latest[nameKey]||'').split(' ')[0] || '—';
     document.getElementById('m-latest-sub').textContent = daysAgo(latest['Timestamp']);
   }
-  var sources = [
+  const sources = [
     {label:'WhatsApp personal',key:'WhatsApp personal'},
     {label:'WhatsApp broadcast',key:'WhatsApp broadcast'},
     {label:'LinkedIn',key:'LinkedIn'},
     {label:'Email',key:'Email'}
   ];
-  var total = allClients.length;
-  document.getElementById('source-grid').innerHTML = sources.map(function(s) {
-    var count = sourceCounts[s.key] || 0;
-    var pct = total > 0 ? Math.round((count/total)*100) : 0;
+  const total = allClients.length;
+  document.getElementById('source-grid').innerHTML = sources.map(s => {
+    const count = sourceCounts[s.key] || 0;
+    const pct = total > 0 ? Math.round((count/total)*100) : 0;
     return '<div class="source-card"><div class="source-name">'+s.label+'</div><div class="source-count">'+count+'</div><div class="source-bar-wrap"><div class="source-bar" style="width:'+pct+'%"></div></div></div>';
   }).join('');
 }
 function renderClients() {
-  var q = (document.getElementById('search-input').value||'').toLowerCase();
-  var sf = (document.getElementById('source-filter').value||'').toLowerCase();
-  var filtered = allClients.filter(function(c) {
-    var name = (c[nameKey]||'').toLowerCase();
-    var mobile = (c['Mobile number']||'').toLowerCase();
-    var employer = (c['Employer / Business firm name']||'').toLowerCase();
-    var email = (c['Email ID']||'').toLowerCase();
-    var matchQ = !q || name.includes(q) || mobile.includes(q) || employer.includes(q) || email.includes(q);
-    var utmSrc = (c['Source (UTM)']||'').toLowerCase();
-    var matchS = !sf || (sf==='unknown' ? (!utmSrc||utmSrc==='unknown') : utmSrc.includes(sf));
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  const sf = (document.getElementById('source-filter').value||'').toLowerCase();
+  const filtered = allClients.filter(c => {
+    const name = (c[nameKey]||'').toLowerCase();
+    const mobile = (c['Mobile number']||'').toLowerCase();
+    const employer = (c['Employer / Business firm name']||'').toLowerCase();
+    const email = (c['Email ID']||'').toLowerCase();
+    const matchQ = !q || name.includes(q) || mobile.includes(q) || employer.includes(q) || email.includes(q);
+    const utmSrc = (c['Source (UTM)']||'').toLowerCase();
+    const matchS = !sf || (sf==='unknown' ? (!utmSrc||utmSrc==='unknown') : utmSrc.includes(sf));
     return matchQ && matchS;
   });
   document.getElementById('client-count').textContent = filtered.length + ' client' + (filtered.length!==1?'s':'');
@@ -277,14 +267,14 @@ function renderClients() {
     document.getElementById('client-list').innerHTML = '<div class="empty-state"><i class="ti ti-users"></i><p>No clients yet — share your form link to get started</p></div>';
     return;
   }
-  document.getElementById('client-list').innerHTML = filtered.map(function(c, i) {
-    var name = c[nameKey]||'Unknown';
-    var mobile = c['Mobile number']||'—';
-    var email = c['Email ID']||'—';
-    var employer = c['Employer / Business firm name']||'';
-    var empType = c['Salaried / Self-employed']||'';
-    var ts = c['Timestamp'];
-    var utm = c['Source (UTM)']||'';
+  document.getElementById('client-list').innerHTML = filtered.map((c, i) => {
+    const name = c[nameKey]||'Unknown';
+    const mobile = c['Mobile number']||'—';
+    const email = c['Email ID']||'—';
+    const employer = c['Employer / Business firm name']||'';
+    const empType = c['Salaried / Self-employed']||'';
+    const ts = c['Timestamp'];
+    const utm = c['Source (UTM)']||'';
     return '<div class="client-row" id="crow-'+i+'">'
       +'<div class="client-row-inner" onclick="toggleProfile('+i+')">'
       +'<div class="avatar">'+initials(name)+'</div>'
@@ -318,9 +308,9 @@ function renderClients() {
   }).join('');
 }
 function toggleProfile(i) {
-  var panel = document.getElementById('panel-'+i);
-  var chev = document.getElementById('chev-'+i);
-  var isOpen = panel.classList.contains('open');
+  const panel = document.getElementById('panel-'+i);
+  const chev = document.getElementById('chev-'+i);
+  const isOpen = panel.classList.contains('open');
   if (expandedRow !== null && expandedRow !== i) {
     document.getElementById('panel-'+expandedRow).classList.remove('open');
     document.getElementById('chev-'+expandedRow).classList.remove('open');
